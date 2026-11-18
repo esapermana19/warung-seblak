@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator QR Poster</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 0 16px; color: #222; }
+    input, select, button { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    button { background: #FF5B42; color: #fff; border: none; cursor: pointer; margin-top: 12px; }
+    #qr-box { margin: 24px auto; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; padding: 12px; background: #fff; }
+    #qr-box img, #qr-box canvas { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <label>Link Website Menu</label>
+  <input type="url" id="url" placeholder="https://warung-seblak-inky.vercel.app/" />
+
+  <label style="display:block; margin-top:12px;">Warna QR</label>
+  <select id="color">
+    <option value="#000000">Hitam (Kontras Terbaik)</option>
+    <option value="#FF5B42">Oranye Merah (#FF5B42)</option>
+  </select>
+
+  <button onclick="generateQR()">Buat QR Code</button>
+  <div id="qr-box"></div>
+  <button id="download-btn" style="display:none; background:#222;" onclick="downloadQR()">Download PNG (1000px)</button>
+
+  <script>
+    function generateQR() {
+      const url = document.getElementById("url").value.trim();
+      const color = document.getElementById("color").value;
+      const box = document.getElementById("qr-box");
+      if (!url) return;
+
+      box.innerHTML = "";
+      new QRCode(box, {
+        text: url,
+        width: 1000,
+        height: 1000,
+        colorDark: color,
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      document.getElementById("download-btn").style.display = "block";
+    }
+
+    function downloadQR() {
+      const canvas = document.querySelector("#qr-box canvas");
+      if (!canvas) return;
+      const link = document.createElement("a");
+      link.download = "qr-menu-seblak.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+  </script>
+</body>
+</html>
