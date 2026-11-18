@@ -3,57 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generator QR Poster</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <title>QR Renggang & Tajam</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 0 16px; color: #222; }
-    input, select, button { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
-    button { background: #FF5B42; color: #fff; border: none; cursor: pointer; margin-top: 12px; }
-    #qr-box { margin: 24px auto; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; padding: 12px; background: #fff; }
-    #qr-box img, #qr-box canvas { width: 100%; height: 100%; }
+    body { font-family: sans-serif; max-width: 400px; margin: 28px auto; padding: 0 16px; color: #222; }
+    label { display: block; font-size: 13px; margin-top: 12px; color: #555; }
+    input[type="url"] { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    input[type="range"] { width: 100%; margin-top: 6px; accent-color: #FF5B42; }
+    .badge { font-size: 12px; margin-top: 6px; padding: 6px 10px; border-radius: 5px; background: #f4f4f5; }
+    .preview { margin: 16px 0; background: #991b1b; padding: 20px; border-radius: 8px; text-align: center; }
+    .preview svg { width: 220px; height: 220px; display: block; margin: 0 auto; }
+    button { width: 100%; padding: 11px; margin-top: 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; color: #fff; }
+    .btn-svg { background: #111; }
+    .btn-png { background: #FF5B42; }
   </style>
 </head>
 <body>
-  <label>Link Website Menu</label>
-  <input type="url" id="url" placeholder="https://warung-seblak-inky.vercel.app/" />
+  <label>Link Website Menu (Maks. 25 karakter untuk 21×21 kotak)</label>
+  <input type="url" id="url" value="https://warung-seblak-inky.vercel.app" oninput="renderQR()" />
+  <div class="badge" id="status"></div>
 
-  <label style="display:block; margin-top:12px;">Warna QR</label>
-  <select id="color">
-    <option value="#000000">Hitam (Kontras Terbaik)</option>
-    <option value="#FF5B42">Oranye Merah (#FF5B42)</option>
-  </select>
+  <label>Kerenggangan Kotak: <span id="gap-label">85% (Renggang)</span></label>
+  <input type="range" id="scale" min="70" max="100" value="85" oninput="renderQR()" />
 
-  <button onclick="generateQR()">Buat QR Code</button>
-  <div id="qr-box"></div>
-  <button id="download-btn" style="display:none; background:#222;" onclick="downloadQR()">Download PNG (1000px)</button>
+  <div class="preview" id="preview"></div>
+
+  <button class="btn-svg" onclick="downloadSVG()">Download SVG (Vektor Paling Tajam)</button>
+  <button class="btn-png" onclick="downloadPNG()">Download PNG (Resolusi Tinggi)</button>
 
   <script>
-    function generateQR() {
-      const url = document.getElementById("url").value.trim();
-      const color = document.getElementById("color").value;
-      const box = document.getElementById("qr-box");
-      if (!url) return;
+    let currentSVG = "";
+    let currentQR = null;
+    const QUIET = 4;
 
-      box.innerHTML = "";
-      new QRCode(box, {
-        text: url,
-        width: 1000,
-        height: 1000,
-        colorDark: color,
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-      document.getElementById("download-btn").style.display = "block";
+    function isAlphanumeric(str) {
+      return /^[0-9A-Z $%*+\-./:]+$/.test(str);
     }
 
-    function downloadQR() {
-      const canvas = document.querySelector("#qr-box canvas");
-      if (!canvas) return;
+    function renderQR() {
+      const raw = document.getElementById("url").value.trim().toUpperCase();
+      const ratio = Number(document.getElementById("scale").value) / 100;
+      document.getElementById("gap-label").textContent =
+        ratio === 1 ? "100% (Rapat)" : `${Math.round(ratio * 100)}% (Renggang)`;
+
+      if (!raw) return;
+
+      const mode = isAlphanumeric(raw) ? "Alphanumeric" : "Byte";
+      const qr = qrcode(0, "L");
+      qr.addData(raw, mode);
+      qr.make();
+      currentQR = qr;
+
+      const count = qr.getModuleCount();
+      const total = count + QUIET * 2;
+      const offset = (1 - ratio) / 2;
+
+      let shapes = `<rect width="${total}" height="${total}" fill="#ffffff"/>`;
+
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            // Tiga kotak pojok (finder pattern) tetap solid agar kamera mengunci fokus seketika
+            const isFinder =
+              (r < 7 && c < 7) ||
+              (r < 7 && c >= count - 7) ||
+              (r >= count - 7 && c < 7);
+
+            if (isFinder || ratio === 1) {
+              shapes += `<rect x="${c + QUIET}" y="${r + QUIET}" width="1.01" height="1.01" fill="#000000"/>`;
+            } else {
+              shapes += `<rect x="${(c + QUIET + offset).toFixed(3)}" y="${(r + QUIET + offset).toFixed(3)}" width="${ratio}" height="${ratio}" rx="0.15" fill="#000000"/>`;
+            }
+          }
+        }
+      }
+
+      currentSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}">${shapes}</svg>`;
+      document.getElementById("preview").innerHTML = currentSVG;
+
+      const statusEl = document.getElementById("status");
+      statusEl.textContent = `Panjang: ${raw.length} karakter | Ukuran matriks: ${count} × ${count} kotak` +
+        (count === 21 ? " (Paling Renggang)" : " (Pendekkan domain jadi ≤25 karakter untuk 21×21)");
+    }
+
+    function downloadSVG() {
+      if (!currentSVG) return;
+      const blob = new Blob([currentSVG], { type: "image/svg+xml;charset=utf-8" });
       const link = document.createElement("a");
-      link.download = "qr-menu-seblak.png";
-      link.href = canvas.toDataURL("image/png");
+      link.href = URL.createObjectURL(blob);
+      link.download = "qr-seblak-renggang.svg";
       link.click();
     }
+
+    function downloadPNG() {
+      if (!currentSVG) return;
+      const img = new Image();
+      const svgBlob = new Blob([currentSVG], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1200;
+        canvas.height = 1200;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, 1200, 1200);
+        URL.revokeObjectURL(url);
+
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "qr-seblak-renggang.png";
+        link.click();
+      };
+      img.src = url;
+    }
+
+    renderQR();
   </script>
 </body>
 </html>
