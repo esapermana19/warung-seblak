@@ -32,6 +32,8 @@
         /* Card Menu */
         .card {
             border: 1px solid #eeeeee;
+            border-radius: 8px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             background: #ffffff;
@@ -58,7 +60,7 @@
 
         .card-price {
             font-size: 14px;
-            color: #FF5B42;
+            color: #ab0e0e;
             margin-bottom: 12px;
         }
 
@@ -71,11 +73,18 @@
             width: 100%;
             padding: 8px;
             background-color: #ffffff;
-            border: 1px solid #FF5B42;
-            color: #FF5B42;
+            border: 1px solid #ab0e0e;
+            color: #ab0e0e;
             text-align: center;
             cursor: pointer;
             font-size: 14px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add:hover {
+            background-color: #ab0e0e;
+            color: #ffffff;
         }
 
         .qty-control {
@@ -88,11 +97,12 @@
         .btn-qty {
             width: 30px;
             height: 30px;
-            background-color: #FF5B42;
+            background-color: #ab0e0e;
             color: #ffffff;
             border: none;
             cursor: pointer;
             font-size: 16px;
+            border-radius: 6px;
         }
 
         .qty-text {
@@ -131,7 +141,7 @@
             left: 2px;
             width: 88px;
             height: 36px;
-            background-color: #FF5B42;
+            background-color: #ab0e0e;
             border-radius: 18px;
             transition: transform 0.3s ease;
         }
@@ -151,13 +161,14 @@
 
         /* Checkout Button */
         .btn-checkout {
-            background-color: #FF5B42;
+            background-color: #ab0e0e;
             color: #ffffff;
             border: none;
             padding: 0 16px;
             height: 40px;
             font-size: 14px;
             cursor: pointer;
+            border-radius: 8px;
         }
 
         /* Modal Checkout */
@@ -189,7 +200,7 @@
             background: none;
             border: none;
             font-size: 14px;
-            color: #FF5B42;
+            color: #ab0e0e;
             cursor: pointer;
         }
 
@@ -209,11 +220,56 @@
             font-size: 14px;
         }
 
+        .req-mark {
+            color: #ab0e0e;
+        }
+
         .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #cccccc;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
             font-size: 14px;
+            border-radius: 8px;
+            outline: none;
+            background-color: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #ab0e0e;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(171, 14, 14, 0.15);
+        }
+
+        /* Pilihan Level Pedas */
+        .level-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .level-btn {
+            padding: 10px 0;
+            border: 1px solid #dddddd;
+            background-color: #ffffff;
+            color: #444444;
+            font-size: 14px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .level-btn:hover {
+            border-color: #ab0e0e;
+            color: #ab0e0e;
+        }
+
+        .level-btn.active {
+            background-color: #ab0e0e;
+            border-color: #ab0e0e;
+            color: #ffffff;
         }
 
         .cart-list {
@@ -239,28 +295,30 @@
         }
 
         .total-price {
-            color: #FF5B42;
+            color: #ab0e0e;
         }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background-color: #FF5B42;
+            background-color: #ab0e0e;
             color: #ffffff;
             border: none;
             margin-top: 24px;
             font-size: 14px;
             cursor: pointer;
+            border-radius: 8px;
         }
 
         .error-message {
             color: #ffffff;
-            background-color: #FF5B42;
+            background-color: #ab0e0e;
             padding: 10px;
             margin-bottom: 16px;
             font-size: 14px;
             display: none;
             text-align: center;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -289,13 +347,20 @@
             <div id="error-box" class="error-message"></div>
 
             <div class="form-group">
-                <label for="input-nama">Nama Pemesan</label>
-                <input type="text" id="input-nama" class="form-control" placeholder="Masukkan nama">
+                <label for="input-nama">Nama Pemesan <span class="req-mark">*</span></label>
+                <input type="text" id="input-nama" class="form-control" placeholder="Contoh: Budi (Wajib diisi)" required>
             </div>
 
             <div class="form-group">
-                <label for="input-level">Level Pedas (1 - 5)</label>
-                <input type="number" id="input-level" class="form-control" min="1" max="5" placeholder="Contoh: 3">
+                <label>Pilih Level Pedas (1 - 5) <span class="req-mark">*</span></label>
+                <div class="level-options" id="level-selector">
+                    <button type="button" class="level-btn" onclick="selectLevel(1)">Lv 1</button>
+                    <button type="button" class="level-btn" onclick="selectLevel(2)">Lv 2</button>
+                    <button type="button" class="level-btn" onclick="selectLevel(3)">Lv 3</button>
+                    <button type="button" class="level-btn" onclick="selectLevel(4)">Lv 4</button>
+                    <button type="button" class="level-btn" onclick="selectLevel(5)">Lv 5</button>
+                </div>
+                <input type="hidden" id="input-level" value="">
             </div>
 
             <div class="cart-list" id="cart-items-container">
@@ -447,6 +512,19 @@
             }, 3000);
         }
 
+        // Pilih Level Pedas
+        function selectLevel(lvl) {
+            document.getElementById('input-level').value = lvl;
+            const buttons = document.querySelectorAll('.level-btn');
+            buttons.forEach((btn, index) => {
+                if (index + 1 === lvl) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
         // Buka Checkout Modal
         function openCheckout() {
             if (Object.keys(cart).length === 0) {
@@ -490,16 +568,16 @@
         function submitOrder() {
             const nama = document.getElementById('input-nama').value.trim();
             const level = document.getElementById('input-level').value.trim();
-            const levelNum = parseInt(level);
 
             // Validasi
             if (!nama) {
-                showError("Nama tidak boleh kosong");
+                showError("Nama pemesan wajib diisi!");
+                document.getElementById('input-nama').focus();
                 return;
             }
 
-            if (!level || isNaN(levelNum) || levelNum < 1 || levelNum > 5) {
-                showError("Level pedas harus diisi antara 1 sampai 5");
+            if (!level) {
+                showError("Silakan pilih level pedas (1 - 5) terlebih dahulu!");
                 return;
             }
 
