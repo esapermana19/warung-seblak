@@ -246,16 +246,23 @@
             box-shadow: 0 0 0 2px rgba(171, 14, 14, 0.15);
         }
 
-        /* Pilihan Level Pedas */
+        /* Pilihan Level Pedas & Kuah */
         .level-options {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
             gap: 8px;
             margin-top: 4px;
         }
 
-        .level-btn {
-            padding: 10px 0;
+        .kuah-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .level-btn, .kuah-btn {
+            padding: 10px 8px;
             border: 1px solid #dddddd;
             background-color: #ffffff;
             color: #444444;
@@ -266,12 +273,12 @@
             transition: all 0.2s ease;
         }
 
-        .level-btn:hover {
+        .level-btn:hover, .kuah-btn:hover {
             border-color: #ab0e0e;
             color: #ab0e0e;
         }
 
-        .level-btn.active {
+        .level-btn.active, .kuah-btn.active {
             background-color: #ab0e0e;
             border-color: #ab0e0e;
             color: #ffffff;
@@ -357,15 +364,26 @@
             </div>
 
             <div class="form-group">
-                <label>Pilih Level Pedas (1 - 5) <span class="req-mark">*</span></label>
+                <label>Pilih Level Pedas <span class="req-mark">*</span></label>
                 <div class="level-options" id="level-selector">
-                    <button type="button" class="level-btn" onclick="selectLevel(1)">Lv 1</button>
-                    <button type="button" class="level-btn" onclick="selectLevel(2)">Lv 2</button>
-                    <button type="button" class="level-btn" onclick="selectLevel(3)">Lv 3</button>
-                    <button type="button" class="level-btn" onclick="selectLevel(4)">Lv 4</button>
-                    <button type="button" class="level-btn" onclick="selectLevel(5)">Lv 5</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('0')">Lv 0</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('1/2')">Lv 1/2</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('1')">Lv 1</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('2')">Lv 2</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('3')">Lv 3</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('4')">Lv 4</button>
+                    <button type="button" class="level-btn" onclick="selectLevel('5')">Lv 5</button>
                 </div>
                 <input type="hidden" id="input-level" value="">
+            </div>
+
+            <div class="form-group">
+                <label>Pilihan Kuah <span class="req-mark">*</span></label>
+                <div class="kuah-options" id="kuah-selector">
+                    <button type="button" class="kuah-btn" onclick="selectKuah('Asin Gurih')">Asin Gurih</button>
+                    <button type="button" class="kuah-btn" onclick="selectKuah('Manis Gurih')">Manis Gurih</button>
+                </div>
+                <input type="hidden" id="input-kuah" value="">
             </div>
 
             <div class="cart-list" id="cart-items-container">
@@ -530,8 +548,21 @@
         function selectLevel(lvl) {
             document.getElementById('input-level').value = lvl;
             const buttons = document.querySelectorAll('.level-btn');
-            buttons.forEach((btn, index) => {
-                if (index + 1 === lvl) {
+            buttons.forEach((btn) => {
+                if (btn.textContent.trim() === 'Lv ' + lvl) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Pilih Kuah
+        function selectKuah(kuah) {
+            document.getElementById('input-kuah').value = kuah;
+            const buttons = document.querySelectorAll('.kuah-btn');
+            buttons.forEach((btn) => {
+                if (btn.textContent.trim().toLowerCase() === kuah.toLowerCase()) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -582,6 +613,7 @@
         function submitOrder() {
             const nama = document.getElementById('input-nama').value.trim();
             const level = document.getElementById('input-level').value.trim();
+            const kuah = document.getElementById('input-kuah').value.trim();
 
             // Validasi
             if (!nama) {
@@ -591,13 +623,19 @@
             }
 
             if (!level) {
-                showError("Silakan pilih level pedas (1 - 5) terlebih dahulu!");
+                showError("Silakan pilih level pedas terlebih dahulu!");
+                return;
+            }
+
+            if (!kuah) {
+                showError("Silakan pilih jenis kuah terlebih dahulu!");
                 return;
             }
 
             let text = "Pemesanan Baru\n\n";
             text += "Nama: " + nama + "\n";
-            text += "Level Pedas: " + level + "\n\n";
+            text += "Level Pedas: Lv " + level + "\n";
+            text += "Pilihan Kuah: " + kuah + "\n\n";
             text += "Daftar Pesanan:\n";
 
             let total = 0;
