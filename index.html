@@ -310,6 +310,17 @@
             color: #ab0e0e;
         }
 
+        .delivery-note {
+            margin-top: 14px;
+            padding: 10px 12px;
+            background-color: #fff4e5;
+            border: 1px solid #ffe2b3;
+            color: #b45309;
+            font-size: 13px;
+            border-radius: 6px;
+            line-height: 1.4;
+        }
+
         .btn-submit {
             width: 100%;
             padding: 14px;
@@ -393,6 +404,10 @@
             <div class="cart-total">
                 <div>Total Pembayaran</div>
                 <div id="total-price-display" class="total-price">Rp 0</div>
+            </div>
+
+            <div class="delivery-note">
+                ℹ️ <em>Catatan:</em> Untuk Delivery / Pesan Antar dikenakan ongkir dengan kisaran tarif Rp 2.000 - Rp 5.000 sesuai jarak
             </div>
 
             <button class="btn-submit" onclick="submitOrder()">Kirim ke WhatsApp</button>
@@ -649,6 +664,7 @@
             }
 
             text += "\nTotal Pembayaran: " + formatPrice(total);
+            text += "\n*Catatan: Belum termasuk ongkir (kisaran Rp 2.000 - Rp 5.000)";
 
             // Redirect WA
             const waUrl = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(text);
